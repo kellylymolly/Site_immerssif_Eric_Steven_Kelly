@@ -31,12 +31,12 @@ img {
     max-height: 400px;
 }
 
+.apple,
 .reddit {
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    padding: 20px;
 }
 
 .reddit img {
