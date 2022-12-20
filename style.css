@@ -24,11 +24,23 @@ h3 {
 p {
     font-size: 16px;
     font-weight: 400;
-    max-width: 800px;
+    max-width: 600px;
 }
 
 img {
     max-height: 400px;
+}
+
+.reddit {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.reddit img {
+    max-width: 50%;
 }
 
 .evolution {
