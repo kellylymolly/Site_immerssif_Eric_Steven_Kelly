@@ -1,339 +1,453 @@
-<<<<<<< Updated upstream
-
-=======
 document.getElementById("modal").style.display = "block";
-(function ($) {
-  var slotMachine = (function () {
-    var credits = 15,
-      spinning = 3,
-      spin = [0, 0, 0],
-      slotsTypes = {
-        cherry: [2, 5, 10],
-        orange: [0, 15, 30],
-        prune: [0, 40, 50],
-        bell: [0, 50, 80],
-        bar1: [0, 0, 100],
-        bar2: [0, 0, 150],
-        bar3: [0, 0, 250],
-        seven: [0, 0, 500],
-        anybar: [0, 0, 80],
-      },
-      slots = [
-        [
-          "orange",
-          "bell",
-          "orange",
-          "bar2",
-          "prune",
-          "orange",
-          "bar3",
-          "prune",
-          "orange",
-          "bar1",
-          "bell",
-          "cherry",
-          "orange",
-          "prune",
-          "bell",
-          "bar1",
-          "cherry",
-          "seven",
-          "orange",
-          "prune",
-          "orange",
-          "bell",
-          "orange",
-        ],
-        [
-          "cherry",
-          "prune",
-          "orange",
-          "bell",
-          "bar1",
-          "cherry",
-          "prune",
-          "bar3",
-          "cherry",
-          "bell",
-          "orange",
-          "bar1",
-          "seven",
-          "cherry",
-          "bar2",
-          "cherry",
-          "bell",
-          "prune",
-          "cherry",
-          "orange",
-          "cherry",
-          "prune",
-          "orange",
-        ],
-        [
-          "cherry",
-          "orange",
-          "bell",
-          "prune",
-          "bar2",
-          "cherry",
-          "prune",
-          "orange",
-          "bar3",
-          "cherry",
-          "bell",
-          "orange",
-          "cherry",
-          "orange",
-          "cherry",
-          "prune",
-          "bar1",
-          "seven",
-          "bell",
-          "cherry",
-          "cherry",
-          "orange",
-          "bell",
-        ],
+
+var fps = 60;
+window.raf = (function () {
+  return (
+    requestAnimationFrame ||
+    webkitRequestAnimationFrame ||
+    mozRequestAnimationFrame ||
+    function (c) {
+      setTimeout(c, 1000 / fps);
+    }
+  );
+})();
+/*--------------=== Slot machine definition ===--------------*/
+(function () {
+  var NAME = "SlotMachine",
+    defaultSettings = {
+      width: "600",
+      height: "600",
+      colNum: 3,
+      rowNum: 9,
+      winRate: 50,
+      autoPlay: true,
+      autoSize: false,
+      autoPlayTime: 10,
+      layout: "compact",
+      handleShow: true,
+      handleWidth: 35,
+      handleHeight: 30,
+      machineBorder: 15,
+      machineColor: "rgba(120,60,30,1)",
+      names: [
+        "seven",
+        "lemon",
+        "cherry",
+        "watermelon",
+        "banana",
+        "bar",
+        "prune",
+        "bigwin",
+        "orange",
       ],
-      startSlot = function () {
-        spinning = false;
-
-        $("#slot-trigger").removeClass("slot-triggerDisabled");
-
-        this.blur();
-
-        return false;
-      },
-      endSlot = function () {
-        $("#slot-block").show();
-        $("#slot-credits").text("VERLOREN!!!");
-
-        setInterval(blink($("#slot-credits")), 1000);
-      },
-      addCredit = function (incrementCredits) {
-        var currentCredits = credits;
-        credits += incrementCredits;
-
-        blink($("#slot-credits"));
-
-        $("#slot-credits")
-          .css("credit", 0)
-          .animate(
-            {
-              credit: incrementCredits,
-            },
-            {
-              duration: 400 + incrementCredits,
-              easing: "easeOut",
-              step: function (now) {
-                $(this).html(parseInt(currentCredits + now, 10));
-              },
-              complete: function () {
-                $(this).html(credits);
-                blink($("#slot-credits"));
-              },
-            }
-          );
-      },
-      spin = function () {
-        this.blur();
-
-        if (spinning == false) {
-          $("#slot-machine .arm").animate({ top: "45px", height: "2%" });
-          $("#slot-machine .arm .knob").animate({
-            top: "-20px",
-            height: "20px",
-          });
-          $("#slot-machine .arm-shadow").animate({ top: "40px" }, 380);
-          $(
-            "#slot-machine .ring1 .shadow, #slot-machine .ring2 .shadow"
-          ).animate({ top: "50%", opacity: 1 });
-
-          spinning = 3;
-          credits--;
-
-          $("#slot-credits").html(credits);
-
-          spin[0] = parseInt(Math.random() * 23);
-          spin[1] = parseInt(Math.random() * 23);
-          spin[2] = parseInt(Math.random() * 23);
-
-          $("#slot-trigger").addClass("slot-triggerDisabled");
-
-          $("img.slotSpinAnimation").show();
-
-          $("#wheel1 img:first").css("top", -(spin[0] * 44 + 16) + "px");
-          $("#wheel2 img:first").css("top", -(spin[1] * 44 + 16) + "px");
-          $("#wheel3 img:first").css("top", -(spin[2] * 44 + 16) + "px");
-
-          setTimeout(function () {
-            $("#slot-machine .arm").animate({
-              top: "-25px",
-              height: "50%",
-              overflow: "visible",
-            });
-            $("#slot-machine .arm .knob").animate({
-              top: "-15px",
-              height: "16px",
-            });
-            $("#slot-machine .arm-shadow").animate({ top: "13px" });
-            $(
-              "#slot-machine .ring1 .shadow, #slot-machine .ring2 .shadow"
-            ).animate({ top: "0", opacity: 0 });
-          }, 500);
-
-          setTimeout(function () {
-            stopSpin(1);
-          }, 1500 + parseInt(1500 * Math.random()));
-
-          setTimeout(function () {
-            stopSpin(2);
-          }, 1500 + parseInt(1500 * Math.random()));
-
-          setTimeout(function () {
-            stopSpin(3);
-          }, 1500 + parseInt(1500 * Math.random()));
-        }
-
-        return false;
-      },
-      stopSpin = function (slot) {
-        $("#wheel" + slot)
-          .find("img:last")
-          .hide()
-          .end()
-          .find("img:first")
-          .animate(
-            {
-              top: -spin[slot - 1] * 44,
-            },
-            {
-              duration: 500,
-              easing: "elasticOut",
-              complete: function () {
-                spinning--;
-
-                if (spinning <= 0) {
-                  endSpin();
-                }
-              },
-            }
-          );
-      },
-      endSpin = function () {
-        var slotType = slots[0][spin[0]],
-          matches = 1,
-          barMatch = /bar/.test(slotType) ? 1 : 0,
-          winnedCredits = 0,
-          waitToSpin = 10;
-
-        if (slotType == slots[1][spin[1]]) {
-          matches++;
-
-          if (slotType == slots[2][spin[2]]) {
-            matches++;
-          } else if (barMatch != 0 && /bar/.test(slots[2][spin[2]])) {
-            barMatch++;
-          }
-        } else if (barMatch != 0 && /bar/.test(slots[1][spin[1]])) {
-          barMatch++;
-
-          if (/bar/.test(slots[2][spin[2]])) {
-            barMatch++;
-          }
-        }
-
-        if (matches != 3 && barMatch == 3) {
-          slotType = "anybar";
-          matches = 3;
-        }
-
-        var winnedCredits = slotsTypes[slotType][matches - 1];
-
-        if (winnedCredits > 0) {
-          addCredit(winnedCredits);
-          waitToSpin = 410 + winnedCredits;
-        }
-
-        setTimeout(function () {
-          if (credits == 0) {
-            endSlot();
-          } else {
-            $("#slot-trigger").removeClass("slot-triggerDisabled");
-            spinning = false;
-          }
-        }, waitToSpin);
-      };
-    return {
-      init: function () {
-        startSlot();
-
-        $("#slot-trigger")
-          .bind("mousedown", function () {
-            $(this).addClass("slot-triggerDown");
-          })
-          .bind("click", spin);
-
-        $(document).bind("mouseup", function () {
-          $("#slot-trigger").removeClass("slot-triggerDown");
-        });
-
-        $("#wheel1 img:first").css(
-          "top",
-          -(parseInt(Math.random() * 23) * 44) + "px"
-        );
-        $("#wheel2 img:first").css(
-          "top",
-          -(parseInt(Math.random() * 23) * 44) + "px"
-        );
-        $("#wheel3 img:first").css(
-          "top",
-          -(parseInt(Math.random() * 23) * 44) + "px"
-        );
-      },
-    };
-  })();
-
-  $.extend($.easing, {
-    bounceOut: function (x, t, b, c, d) {
-      if ((t /= d) < 1 / 2.75) {
-        return c * (7.5625 * t * t) + b;
-      } else if (t < 2 / 2.75) {
-        return c * (7.5625 * (t -= 1.5 / 2.75) * t + 0.75) + b;
-      } else if (t < 2.5 / 2.75) {
-        return c * (7.5625 * (t -= 2.25 / 2.75) * t + 0.9375) + b;
-      } else {
-        return c * (7.5625 * (t -= 2.625 / 2.75) * t + 0.984375) + b;
+    },
+    completed = true,
+    isShuffle = true,
+    supportTouch = "ontouchstart" in window || navigator.msMaxTouchPoints,
+    firstTime = true,
+    nextLoop = null;
+  SlotMachine = function (argument) {
+    this.init = this.init.bind(this);
+    this.run = this.run.bind(this);
+    this.addListener = this.addListener.bind(this);
+    this.beforeRun = this.beforeRun.bind(this);
+    this.afterRun = this.afterRun.bind(this);
+    this.showWin = this.showWin.bind(this);
+    this.rotateHandle = this.rotateHandle.bind(this);
+    this.colArr = [];
+    this.options = {};
+  };
+  SlotMachine.prototype.beforeRun = function () {
+    if (completed) {
+      this.showWin(false);
+      completed = false;
+      var result = null;
+      result =
+        this.options.names[
+          random((this.options.rowNum * 100) / this.options.winRate) | 0
+        ]; //set winrate
+      for (var i = 0; i < this.options.colNum; i++) {
+        this.colArr[i].beforeRun(result);
       }
-    },
-    easeOut: function (x, t, b, c, d) {
-      return -c * (t /= d) * (t - 2) + b;
-    },
-    elasticOut: function (x, t, b, c, d) {
-      var s = 1.70158;
-      var p = 0;
-      var a = c;
-      if (t == 0) return b;
-      if ((t /= d) == 1) return b + c;
-      if (!p) p = d * 0.3;
-      if (a < Math.abs(c)) {
-        a = c;
-        var s = p / 4;
-      } else var s = (p / (2 * Math.PI)) * Math.asin(c / a);
-      return (
-        a * Math.pow(2, -10 * t) * Math.sin(((t * d - s) * (2 * Math.PI)) / p) +
-        c +
-        b
+      this.rotateHandle();
+      this.run();
+    }
+    if (this.options.autoPlay)
+      nextLoop = setTimeout(
+        function () {
+          this.beforeRun();
+        }.bind(this),
+        this.options.autoPlayTime * 1000
       );
+  };
+  SlotMachine.prototype.afterRun = function () {
+    completed = true;
+    var results = [],
+      win = true;
+    for (var i = 0; i < this.options.colNum; i++) {
+      results.push(this.colArr[i].getResult());
+      if (i > 0 && results[i] != results[i - 1]) {
+        win = false;
+        break;
+      }
+    }
+    if (win) {
+      this.showWin(true);
+      setTimeout(
+        function () {
+          this.showWin(false);
+        }.bind(this),
+        this.options.autoPlayTime * 1000
+      );
+    }
+  };
+  SlotMachine.prototype.rotateHandle = function () {
+    var handle = document.querySelector(".handle");
+    if (handle) {
+      handle.addClass("active");
+      setTimeout(function () {
+        handle.removeClass("active");
+      }, 1000);
+    }
+  };
+  SlotMachine.prototype.run = function () {
+    var done = true;
+    for (var i = 0; i < this.options.colNum; i++) {
+      done &= this.colArr[i].run();
+    }
+    if (!done) raf(this.run);
+    else this.afterRun();
+  };
+
+  SlotMachine.prototype.showWin = function (show) {
+    var winner = document.querySelector(".winner");
+    if (winner) winner.className = show ? "winner active" : "winner";
+  };
+  SlotMachine.prototype.init = function () {
+    //reset all
+    completed = true;
+    clearTimeout(nextLoop);
+    //get settings
+    var BannerFlow = arguments[0],
+      settingStyle = "",
+      machine = document.querySelector(".machine"),
+      container = document.querySelector(".container");
+    machine.style.opacity = 0;
+    for (var key in defaultSettings) {
+      this.options[key] = defaultSettings[key];
+    }
+    if (BannerFlow !== undefined) {
+      var settings = BannerFlow.settings;
+      this.options.winRate = settings.winRate
+        ? settings.winRate
+        : defaultSettings.winRate;
+      this.options.autoPlay = settings.autoPlay;
+      this.options.colNum = settings.numberColumn
+        ? settings.numberColumn
+        : defaultSettings.colNum;
+      this.options.layout = settings.layout
+        ? settings.layout
+        : defaultSettings.layout;
+      this.options.machineColor = settings.machineColor
+        ? settings.machineColor
+        : defaultSettings.machineColor;
+      this.options.machineBorder =
+        settings.machineBorder >= 0
+          ? settings.machineBorder
+          : defaultSettings.machineBorder;
+      this.options.height = settings.height
+        ? settings.height
+        : defaultSettings.height;
+      this.options.width = settings.width
+        ? settings.width
+        : defaultSettings.width;
+      this.options.autoSize = settings.autoSize;
+      if (this.options.autoSize) {
+        this.options.height = window.innerHeight;
+        this.options.width = window.innerWidth;
+      }
+      this.options.handleShow = settings.handleShow;
+      this.options.handleWidth = this.options.handleShow
+        ? defaultSettings.handleWidth
+        : 0;
+      this.options.autoPlayTime = settings.autoPlayTime
+        ? settings.autoPlayTime
+        : defaultSettings.autoPlayTime;
+      this.options.customImage = settings.customImage;
+    }
+    //apply settings
+    if (this.options.customImage) {
+      var urls = BannerFlow.text.strip().split(",");
+      this.options.names = [];
+      for (var i = 0; i < urls.length; i++) {
+        var name = "image-" + i;
+        urls[i];
+        this.options.names.push(name);
+        settingStyle += getStyle("." + name + ":after", {
+          "background-image": "url('" + urls[i] + "')",
+        });
+      }
+    }
+    settingStyle += getStyle(".machine", {
+      "margin-top": (window.innerHeight - this.options.height) / 2 + "px",
+      "margin-left": (window.innerWidth - this.options.width) / 2 + "px",
+    });
+    settingStyle += getStyle(".container", {
+      height: this.options.height + "px",
+      width: this.options.width - this.options.handleWidth + "px",
+      "border-width": this.options.machineBorder + "px",
+      "border-color":
+        this.options.machineColor + " " + getLighter(this.options.machineColor),
+    });
+    var winnerSize = 1.2 * Math.max(this.options.height, this.options.width);
+    settingStyle += getStyle(".winner:before,.winner:after", {
+      height: winnerSize + "px",
+      width: winnerSize + "px",
+      top: (this.options.height - winnerSize) / 2 - 20 + "px",
+      left:
+        (this.options.width - winnerSize) / 2 - this.options.handleWidth + "px",
+    });
+    settingStyle += getStyle(".handle", {
+      "margin-top": this.options.height / 2 - this.options.handleHeight + "px",
+    });
+    document.querySelector("#setting").innerHTML = settingStyle;
+    //remove old cols
+    if (this.colArr && this.colArr.length > 0)
+      for (var i = 0; i < this.colArr.length; i++) {
+        container.removeChild(this.colArr[i].getDOM());
+      }
+    this.colArr = [];
+    // add new cols
+    for (var i = 0; i < this.options.colNum; i++) {
+      var col = new SlotColumn();
+      col.init(this.options.names.slice(0, this.options.rowNum), isShuffle);
+      this.colArr.push(col);
+      document.querySelector(".container").appendChild(col.getDOM());
+    }
+    machine.style.opacity = "1";
+  };
+
+  SlotMachine.prototype.addListener = function () {
+    var BannerFlow = arguments[0],
+      timer,
+      that = this,
+      container = document.querySelector(".container");
+    if (typeof BannerFlow != "undefined") {
+      // BannerFlow event
+      BannerFlow.addEventListener(BannerFlow.RESIZE, function () {
+        //clearTimeout(timer);
+        //timer = setTimeout(function(){that.init(BannerFlow);that.beforeRun()},500);
+      });
+      BannerFlow.addEventListener(BannerFlow.CLICK, function () {
+        that.beforeRun();
+      });
+    } else {
+      // Window event
+      window.addEventListener("resize", function () {
+        //clearTimeout(timer);
+        //timer = setTimeout(function(){that.init(BannerFlow);that.beforeRun()},500)
+      });
+      if (supportTouch) {
+        window.addEventListener("touchstart", function () {
+          that.beforeRun();
+        });
+      } else {
+        window.addEventListener("click", function () {
+          that.beforeRun();
+        });
+      }
+    }
+    var slotTrigger = document.querySelector("#slot-trigger");
+    if (slotTrigger) {
+      slotTrigger.addEventListener("click", function (e) {
+        this.addClass("slot-triggerDown");
+      });
+    }
+  };
+  window[NAME] = SlotMachine;
+})();
+/*--------------=== Slot Column definition ===--------------*/
+(function () {
+  var NAME = "SlotColumn";
+  SlotColumn = function () {
+    this.col = document.createElement("div");
+    this.col.className = "col";
+    this.init = this.init.bind(this);
+    this.run = this.run.bind(this);
+    this.beforeRun = this.beforeRun.bind(this);
+    this.getResult = this.getResult.bind(this);
+    this.getDOM = this.getDOM.bind(this);
+    this.arr = [];
+    this.colHeight = this.rowHeight = 0;
+    this.loop = 2;
+  };
+  SlotColumn.prototype.init = function () {
+    this.col.empty();
+    this.arr = arguments[0];
+    var isShuffle = arguments[1];
+    if (isShuffle) shuffle(this.arr);
+    for (var i = 0; i < this.arr.length * this.loop; i++) {
+      var row = document.createElement("div");
+      row.className = "row " + this.arr[i % this.arr.length];
+      this.col.appendChild(row);
+    }
+    this.top = 0;
+  };
+  SlotColumn.prototype.beforeRun = function () {
+    this.halfHeight = this.col.offsetHeight / this.loop;
+    this.colHeight = this.col.scrollHeight / 2;
+    this.rowHeight = this.colHeight / this.arr.length;
+    this.nextResult = arguments[0];
+    var next = this.arr.indexOf(this.nextResult);
+    if (next == -1) next = random(0, this.arr.length - 1) | 0;
+    var s =
+      this.top +
+      (random(2, 10) | 0) * this.colHeight +
+      (((next + 0.5) * this.rowHeight) | 0) -
+      this.halfHeight;
+    var n = (random(2, 6) | 0) * fps;
+    this.speed = (2 * s) / (n + 1);
+    this.acceleration = this.speed / n;
+  };
+  SlotColumn.prototype.getResult = function () {
+    var result =
+      Math.ceil(
+        ((this.halfHeight - this.top) % this.colHeight) / this.rowHeight
+      ) - 1;
+    //console.log(this.top,result,this.arr[result],this.halfHeight,this.colHeight,this.rowHeight);
+    return this.arr[result];
+  };
+  SlotColumn.prototype.run = function () {
+    if (this.speed <= 0) return true; //completed
+    this.top = (this.top - this.speed) % this.colHeight;
+    this.speed -= this.acceleration;
+    this.top %= this.colHeight;
+    this.col.style.transform = "translateY(" + this.top + "px)";
+    return false; //not completed
+  };
+  SlotColumn.prototype.getDOM = function () {
+    return this.col;
+  };
+  window[NAME] = SlotColumn;
+})();
+/*--------------=== Utils definition ===--------------*/
+//random in range
+var random = function () {
+  var isNumeric = function (n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
     },
+    val = Math.random(),
+    arg = arguments;
+  return isNumeric(arg[0])
+    ? isNumeric(arg[1])
+      ? arg[0] + val * (arg[1] - arg[0])
+      : val * arg[0]
+    : val;
+};
+//shuffle an array
+var shuffle = function (arr) {
+  var j, tmp;
+  for (var i = 0; i < arr.length; i++) {
+    j = random(arr.length) | 0;
+    tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+  }
+};
+//get CSS3 style
+var setStyleCss3 = function (object, key, value) {
+  object.style["-webkit-" + key] = value;
+  object.style["-moz-" + key] = value;
+  object.style["-ms-" + key] = value;
+  object.style[key] = value;
+};
+//get name from url
+var getNameFromUrl = function (url) {
+  if (url) {
+    var s = url.lastIndexOf("/") + 1,
+      e = url.lastIndexOf(".");
+    return s < e ? url.substring(s, e) : "";
+  }
+  return "";
+};
+//get style from object style
+var getStyle = function (selector, styleObj) {
+  var isAttribute = false;
+  var newStyle = selector + "{";
+  for (var attr in styleObj) {
+    if (styleObj[attr]) {
+      isAttribute = true;
+      newStyle += attr + " : " + styleObj[attr] + ";";
+    }
+  }
+  newStyle += "}";
+  return isAttribute ? newStyle : "";
+};
+// get lighter color from rgba colors
+var getLighter = function (rgba) {
+  var o = /[^,]+(?=\))/g.exec(rgba)[0] * 0.75;
+  return rgba.replace(/[^,]+(?=\))/g, o);
+};
+//remove html from text
+if (!String.prototype.strip) {
+  String.prototype.strip = function () {
+    return this.replace(/(<[^>]+>)/gi, " ").trim();
+  };
+}
+//remove all child node
+if (!Node.prototype.empty) {
+  Node.prototype.empty = function () {
+    while (this.firstChild) {
+      this.removeChild(this.firstChild);
+    }
+  };
+}
+if (!HTMLElement.prototype.hasClass) {
+  Element.prototype.hasClass = function (c) {
+    return (
+      (" " + this.className + " ")
+        .replace(/[\n\t]/g, " ")
+        .indexOf(" " + c + " ") > -1
+    );
+  };
+}
+if (!HTMLElement.prototype.addClass) {
+  HTMLElement.prototype.addClass = function (c) {
+    if (!this.hasClass(c)) this.className += " " + c;
+    return this;
+  };
+}
+if (!HTMLElement.prototype.removeClass) {
+  HTMLElement.prototype.removeClass = function (c) {
+    if (this.hasClass(c))
+      this.className = (" " + this.className + " ")
+        .replace(" " + c + " ", " ")
+        .trim();
+    return this;
+  };
+}
+/*--------------=== Main function ===--------------*/
+var timer,
+  widget = null;
+if (typeof BannerFlow != "undefined") {
+  BannerFlow.addEventListener(BannerFlow.SETTINGS_CHANGED, function () {
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      if (widget == null) {
+        widget = new SlotMachine();
+        widget.addListener(BannerFlow);
+      }
+      widget.init(BannerFlow);
+      widget.beforeRun();
+    }, 500);
   });
-
-  $(document).ready(slotMachine.init);
-})(jQuery);
-
-function blink(element) {
-  element.animate({ opacity: 0 }, 200, "linear", function () {
-    $(this).animate({ opacity: 1 }, 200);
+} else {
+  window.addEventListener("load", function (e) {
+    if (widget == null) {
+      widget = new SlotMachine();
+      widget.addListener();
+    }
+    widget.init();
+    widget.beforeRun();
   });
 }
->>>>>>> Stashed changes
