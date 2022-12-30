@@ -24,27 +24,23 @@ h3 {
 p {
   font-size: 16px;
   font-weight: 400;
-  max-width: 600px;
-
-  font-size: 16px;
-  font-weight: 400;
-  max-width: 800px;
 }
 
 img {
   max-height: 400px;
+  padding-top: 40px;
+  padding-bottom: 40px;
 }
 
+.apple p {
+  max-width: 640px;
+}
 .apple,
 .reddit {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-}
-
-.reddit img {
-  max-width: 50%;
 }
 
 .evolution {
