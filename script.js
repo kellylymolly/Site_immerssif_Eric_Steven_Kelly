@@ -1,5 +1,3 @@
-document.getElementById("modal").style.display = "block";
-
 var fps = 60;
 window.raf = (function () {
   return (
