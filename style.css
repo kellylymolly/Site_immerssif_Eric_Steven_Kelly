@@ -92,20 +92,3 @@ span {
     visibility: hidden;
     opacity: 0;
 }
-
-.BigBox {
-    background-color: red;
-    display: flex;
-}
-
-.smallBox {
-    display: flex;
-}
-
-.lennyImg {
-    width: 30vh;
-}
-
-.textLenny {
-    width: 50%;
-}
